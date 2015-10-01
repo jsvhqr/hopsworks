@@ -42,6 +42,7 @@ angular.module('hopsWorksApp')
               var incomingTemplateId = JSON.parse(response.board).templateId;
               
               if(self.currentTemplateID === incomingTemplateId){
+                //TODO. Check if the message is a template before parsing
                 self.currentBoard = JSON.parse(response.board);
               }
             });
@@ -56,13 +57,13 @@ angular.module('hopsWorksApp')
                     });
 
             //get the current project to get its inodeid
-            ProjectService.get({}, {'id': parseInt($routeParams.projectID)})
-                    .$promise.then(
-                            function (success) {
-                              self.projectInodeid = success.inodeid;
-
-                            }, function (error) {
-                    });
+//            ProjectService.get({}, {'id': parseInt($routeParams.projectID)})
+//                    .$promise.then(
+//                            function (success) {
+//                              self.projectInodeid = success.inodeid;
+//
+//                            }, function (error) {
+//                    });
 
             /**
              * submit form data when the 'save' button is clicked or when the enter key is hit
@@ -273,10 +274,17 @@ angular.module('hopsWorksApp')
              */
             self.attachTemplate = function (file) {
               var templateId = -1;
-
+              
+              console.log(JSON.stringify(file));
+              
               var data = {inodePath: "", templateId: -1};
               data.inodePath = file.path;
-
+              
+              //it means this is a project
+              if(angular.isUndefined(data.inodePath)){
+                data.inodePath = "Projects/" + file.project.inode.inodePK.name;
+                file.id = file.project.inode.id;
+              }
               ModalService.attachTemplate('sm', file, templateId)
                       .then(function (success) {
                         data.templateId = success.templateId;
